@@ -12,7 +12,7 @@ import org.ros.Publisher;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.message.geometry_msgs.Twist;
 
-public class Proteus implements NodeMain {
+public class LaserScan implements NodeMain {
 
   private Node node;
 
