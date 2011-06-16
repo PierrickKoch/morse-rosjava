@@ -46,6 +46,7 @@ echo "========================================"
 
 if [ ! -d morse ]; then
   git clone https://github.com/pierriko/morse.git
+  echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3/dist-packages' >> $WORKING_DIR/setup.sh
   cd morse
 else
   cd morse
