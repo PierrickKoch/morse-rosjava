@@ -12,7 +12,7 @@ import org.ros.Publisher;
 import org.ros.message.sensor_msgs.LaserScan;
 import org.ros.message.geometry_msgs.Twist;
 
-public class LaserScan implements NodeMain {
+public class LaserScanMotion implements NodeMain {
 
   private Node node;
 
@@ -59,7 +59,7 @@ public class LaserScan implements NodeMain {
           publisher.publish(cmd);
         }
       }, LaserScan.class);
-      log.info("done");
+      log.info("ready");
     } catch (Exception e) {
       if (node != null) {
         node.getLog().fatal(e);

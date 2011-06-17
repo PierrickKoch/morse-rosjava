@@ -57,7 +57,8 @@ else
 fi
 
 mkdir build && cd build
-cmake -DBUILD_ROS_SUPPORT=ON  .. 
+cmake -DBUILD_ROS_SUPPORT=ON ..
+#cmake -DBUILD_ROS_SUPPORT=ON -DPYTHON_EXECUTABLE=$(which python3.1) ..
 sudo make install
 echo "Morse built, do 'morse check' to check"
 
