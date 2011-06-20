@@ -1,6 +1,5 @@
 package org.ros.tutorials.pubsub;
 
-import com.google.common.base.Preconditions;
 import org.apache.commons.logging.Log;
 import org.ros.MessageListener;
 import org.ros.Node;
@@ -10,9 +9,12 @@ import org.ros.Publisher;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.message.sensor_msgs.LaserScan;
 
+import com.google.common.base.Preconditions;
+
 public class LaserScanMotion implements NodeMain {
 
 	private Node node;
+	private Publisher<Twist> publisher;
 
 	@Override
 	public void main(NodeConfiguration configuration) {
@@ -22,12 +24,8 @@ public class LaserScanMotion implements NodeMain {
 			node = new Node("laser_cmd", configuration);
 			Log log = node.getLog();
 			log.info("init");
-			node.createSubscriber( //
-					"/ATRV/Sick", //
-					new MyListener( //
-							log, //
-							node.createPublisher("/ATRV/Motion_Controller", Twist.class)), //
-					LaserScan.class);
+			publisher = node.createPublisher("/ATRV/Motion_Controller", Twist.class);
+			node.createSubscriber("/ATRV/Sick", new MyListener(log), LaserScan.class);
 			log.info("ready");
 		} catch (Exception e) {
 			if (node != null) {
@@ -44,14 +42,16 @@ public class LaserScanMotion implements NodeMain {
 		node = null;
 	}
 
+	private void publish(Twist cmd) {
+		publisher.publish(cmd);
+	}
+
 	private class MyListener implements MessageListener<LaserScan> {
 
 		private final Log log;
-		private final Publisher<Twist> publisher;
 
-		public MyListener(Log log, Publisher<Twist> publisher) {
+		public MyListener(Log log) {
 			this.log = log;
-			this.publisher = publisher;
 		}
 
 		@Override
@@ -63,7 +63,7 @@ public class LaserScanMotion implements NodeMain {
 			} else {
 				cmd.linear.x = 1;
 			}
-			publisher.publish(cmd);
+			publish(cmd);
 		}
 
 		private boolean obstacleIsClose(float[] ranges) {
