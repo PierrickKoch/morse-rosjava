@@ -59,7 +59,7 @@ public class LaserScanMotion implements NodeMain {
 			Twist cmd = new Twist();
 			float[] ranges = msg.ranges;
 			if (obstacleIsClose(ranges)) {
-				cmd.angular.z = newAngle(ranges);
+				cmd.angular.z = newAngularVelocity(ranges);
 			} else {
 				cmd.linear.x = 1;
 			}
@@ -79,7 +79,7 @@ public class LaserScanMotion implements NodeMain {
 			return ranges.length / 2;
 		}
 
-		private int newAngle(float[] ranges) {
+		private int newAngularVelocity(float[] ranges) {
 			double midA = 0, midB = 0;
 			// we look to the left and to the right and decide which ones has
 			// more space
