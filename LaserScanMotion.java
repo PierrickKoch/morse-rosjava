@@ -1,6 +1,7 @@
 package org.ros.tutorials.pubsub;
 
 import org.apache.commons.logging.Log;
+import org.ros.DefaultNode;
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
@@ -8,6 +9,7 @@ import org.ros.NodeMain;
 import org.ros.Publisher;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.message.sensor_msgs.LaserScan;
+import org.ros.message.sensor_msgs.Image;
 
 import com.google.common.base.Preconditions;
 
@@ -21,11 +23,13 @@ public class LaserScanMotion implements NodeMain {
 		Preconditions.checkState(node == null);
 		Preconditions.checkNotNull(configuration);
 		try {
-			node = new Node("laser_cmd", configuration);
+			node = new DefaultNode("laser_cmd", configuration);
 			Log log = node.getLog();
 			log.info("init");
 			publisher = node.createPublisher("/ATRV/Motion_Controller", Twist.class);
-			node.createSubscriber("/ATRV/Sick", new MyListener(log), LaserScan.class);
+			node.createSubscriber("/ATRV/Sick", new LaserListener(log), LaserScan.class);
+			node.createSubscriber("/ATRV/Odometry", new OdometryListener(log), Twist.class);
+			node.createSubscriber("/ATRV/CameraMain", new CameraListener(log), Image.class);
 			log.info("ready");
 		} catch (Exception e) {
 			if (node != null) {
@@ -46,16 +50,51 @@ public class LaserScanMotion implements NodeMain {
 		publisher.publish(cmd);
 	}
 
-	private class MyListener implements MessageListener<LaserScan> {
+  // Odometry 
+	private class OdometryListener implements MessageListener<Twist> {
 
 		private final Log log;
 
-		public MyListener(Log log) {
+		public OdometryListener(Log log) {
+			this.log = log;
+		}
+
+		@Override
+		public void onNewMessage(Twist msg) {
+		  // cf http://www.ros.org/doc/api/geometry_msgs/html/msg/Twist.html
+		  // http://www.openrobots.org/morse/doc/latest/user/sensors/odometry.html
+		  log.info("Odometry sensor:" + msg);
+		}
+  }
+  // Camera 
+	private class CameraListener implements MessageListener<Image> {
+
+		private final Log log;
+
+		public CameraListener(Log log) {
+			this.log = log;
+		}
+
+		@Override
+		public void onNewMessage(Image msg) {
+		  // cf http://www.ros.org/doc/api/sensor_msgs/html/msg/Image.html
+		  // http://www.openrobots.org/morse/doc/latest/user/sensors/camera.html
+		  log.info("Camera sensor: new img");
+		}
+  }
+  // Laser 
+	private class LaserListener implements MessageListener<LaserScan> {
+
+		private final Log log;
+
+		public LaserListener(Log log) {
 			this.log = log;
 		}
 
 		@Override
 		public void onNewMessage(LaserScan msg) {
+		  // cf http://www.ros.org/doc/api/sensor_msgs/html/msg/LaserScan.html
+		  // http://www.openrobots.org/morse/doc/latest/user/sensors/sick.html
 			Twist cmd = new Twist();
 			float[] ranges = msg.ranges;
 			if (obstacleIsClose(ranges)) {
@@ -64,6 +103,7 @@ public class LaserScanMotion implements NodeMain {
 				cmd.linear.x = 1;
 			}
 			publish(cmd);
+			// http://www.openrobots.org/morse/doc/latest/user/actuators/v_omega.html
 		}
 
 		private boolean obstacleIsClose(float[] ranges) {
