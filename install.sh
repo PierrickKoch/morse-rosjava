@@ -102,9 +102,7 @@ echo "========================================"
 echo "            Install ROSJava"
 echo "========================================"
 
-roscd rosjava
-ant dist
+rosmake rosjava
 
 echo "done"
-apt-get moo
 
